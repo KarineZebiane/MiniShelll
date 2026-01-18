@@ -6,7 +6,7 @@
 /*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:56:19 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/09 19:28:42 by kzebian          ###   ########.fr       */
+/*   Updated: 2026/01/18 20:53:19 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,12 +69,15 @@ void	ms_remove_quotes(t_command *cmd)
 {
 	int i;
 	char *unquoted;
+	char *old;
 
 	i = 0;
 	while (cmd->args[i])
 	{
+		old = cmd->args[i];
 		unquoted = ms_remove_quotes_from_string(cmd->args[i]);
 		cmd->args[i] = unquoted;
+		free(old);
 		i++;
 	}
 }

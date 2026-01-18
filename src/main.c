@@ -6,7 +6,7 @@
 /*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:37:11 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/18 19:29:03 by kzebian          ###   ########.fr       */
+/*   Updated: 2026/01/18 21:19:47 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,13 +63,21 @@ static void	ms_shell_loop(t_data *data)
 		}
 		if (data->command_list)
 			ms_execute_manager(data);
+		
+		// CRITICAL FIX: Free command_list after execution
 		if (data->command_list)
 		{
 			ft_lstclear(&(data->command_list), ms_free_command_node);
 			data->command_list = NULL;
 		}
+		
+		// CRITICAL FIX: Free tokens after parsing
 		if (tokens)
+		{
 			ft_lstclear(&tokens, ms_free_token);
+			tokens = NULL;
+		}
+		
 		free(line);
 	}
 }
