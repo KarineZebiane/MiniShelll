@@ -15,6 +15,7 @@ OBJ_DIR     = obj
 SRCS        = $(SRC_DIR)/main.c \
               $(SRC_DIR)/setup/ms_init.c \
               $(SRC_DIR)/setup/ms_env.c \
+              $(SRC_DIR)/setup/ms_env_utils.c \
               $(SRC_DIR)/setup/utils.c \
               $(SRC_DIR)/signals/ms_signals.c \
               $(SRC_DIR)/lexer/lexer.c \
@@ -22,11 +23,13 @@ SRCS        = $(SRC_DIR)/main.c \
               $(SRC_DIR)/lexer/char_utils.c \
               $(SRC_DIR)/lexer/extract_utils.c \
               $(SRC_DIR)/lexer/quote_utils.c \
+              $(SRC_DIR)/lexer/quote_helper.c \
               $(SRC_DIR)/parser/parser.c \
               $(SRC_DIR)/parser/syntax_check.c \
               $(SRC_DIR)/parser/parser_utils.c \
               $(SRC_DIR)/parser/build_command.c \
               $(SRC_DIR)/expander/ms_expand_vars.c \
+              $(SRC_DIR)/expander/ms_expand_utils.c \
               $(SRC_DIR)/expander/ms_remove_quotes.c \
                 $(SRC_DIR)/executor/ms_execute_cmd.c \
                 $(SRC_DIR)/executor/ms_execute.c \
@@ -34,8 +37,10 @@ SRCS        = $(SRC_DIR)/main.c \
                 $(SRC_DIR)/executor/ms_pipes.c \
                 $(SRC_DIR)/io_redir/ms_heredoc.c \
                 $(SRC_DIR)/io_redir/ms_redir_setup.c \
+                $(SRC_DIR)/io_redir/ms_redir_handlers.c \
                 $(SRC_DIR)/Built-ins/ms_builtin_simple.c \
                 $(SRC_DIR)/Built-ins/ms_builtin_complex.c \
+                $(SRC_DIR)/Built-ins/ms_builtin_utils.c \
                 $(SRC_DIR)/Built-ins/ms_builtin_exit.c \
                 
 

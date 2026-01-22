@@ -6,26 +6,60 @@
 /*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:37:11 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/18 21:19:47 by kzebian          ###   ########.fr       */
+/*   Updated: 2026/01/21 22:29:53 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-/*
-** The single allowed global variable (Subject requirement)
-** Stores signal status for signal handling
-*/
-int	g_signal_status = 0;
+int			g_signal_status;
 
-/*
-** The core execution loop of the shell.
-** Prompts user, reads input, processes, and executes.
-*/
+static void	ms_process_commands(t_data *data)
+{
+	t_list		*cmd_node;
+	t_command	*cmd;
+
+	cmd_node = data->command_list;
+	while (cmd_node)
+	{
+		cmd = (t_command *)cmd_node->content;
+		ms_expand_vars(data, cmd);
+		ms_remove_quotes(cmd);
+		cmd_node = cmd_node->next;
+	}
+}
+
+static void	ms_handle_line(t_data *data, char *line)
+{
+	t_list	*tokens;
+
+	tokens = ms_lexer(line);
+	if (g_signal_status == 2)
+	{
+		data->last_exit_code = 130;
+		g_signal_status = 0;
+	}
+	if (tokens)
+		data->command_list = ms_parser(tokens);
+	if (tokens)
+	{
+		ft_lstclear(&tokens, ms_free_token);
+		tokens = NULL;
+	}
+	if (data->command_list)
+		ms_process_commands(data);
+	if (data->command_list)
+		ms_execute_manager(data);
+	if (data->command_list)
+	{
+		ft_lstclear(&(data->command_list), ms_free_command_node);
+		data->command_list = NULL;
+	}
+}
+
 static void	ms_shell_loop(t_data *data)
 {
 	char	*line;
-	t_list	*tokens;
 
 	while (1)
 	{
@@ -40,44 +74,9 @@ static void	ms_shell_loop(t_data *data)
 		{
 			free(line);
 			continue ;
-		}	
+		}
 		add_history(line);
-		tokens = ms_lexer(line);
-		if (g_signal_status == 2)
-		{
-			data->last_exit_code = 130;
-			g_signal_status = 0;
-		}
-		if (tokens)
-			data->command_list = ms_parser(tokens);
-		if (data->command_list)
-		{
-			t_list *cmd_node = data->command_list;
-			while (cmd_node)
-			{
-				t_command *cmd = (t_command *)cmd_node->content;
-				ms_expand_vars(data, cmd);
-				ms_remove_quotes(cmd);
-				cmd_node = cmd_node->next;
-			}
-		}
-		if (data->command_list)
-			ms_execute_manager(data);
-		
-		// CRITICAL FIX: Free command_list after execution
-		if (data->command_list)
-		{
-			ft_lstclear(&(data->command_list), ms_free_command_node);
-			data->command_list = NULL;
-		}
-		
-		// CRITICAL FIX: Free tokens after parsing
-		if (tokens)
-		{
-			ft_lstclear(&tokens, ms_free_token);
-			tokens = NULL;
-		}
-		
+		ms_handle_line(data, line);
 		free(line);
 	}
 }
@@ -90,7 +89,7 @@ int	main(int argc, char **argv, char **envp)
 	(void)argc;
 	(void)argv;
 	ms_init_data(&data, envp);
-	ms_shell_loop(&data);	
+	ms_shell_loop(&data);
 	exit_code = data.last_exit_code;
 	ms_cleanup(&data);
 	return (exit_code);

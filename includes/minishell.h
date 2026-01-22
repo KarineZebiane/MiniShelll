@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abkhoder <abkhoder@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:29:12 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/16 10:28:34 by abkhoder         ###   ########.fr       */
+/*   Updated: 2026/01/21 22:33:28 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,15 @@ typedef struct s_data
 	int				stdout_backup;
 }					t_data;
 
+typedef struct s_quote_ctx
+{
+	char			*str;
+	char			*result;
+	int				i;
+	int				j;
+	char			in_quote;
+}					t_quote_ctx;
+
 void				ms_init_data(t_data *data, char **envp);
 void				ms_cleanup(t_data *data);
 void				ms_save_io(t_data *data);
@@ -134,6 +143,11 @@ void				ms_add_argument(t_command *cmd, char *arg);
 int					ms_add_redirection(t_command *cmd, t_list **current_token);
 int					ms_setup_redirections(t_command *cmd);
 int					ms_do_heredoc(t_redir *redir);
+int					ms_handle_redir_in(t_redir *redir);
+int					ms_handle_redir_out(t_redir *redir, int append);
+int					ms_handle_heredoc(t_redir *redir);
+int					ms_open_redir_in(char *file);
+int					ms_open_redir_out(char *file, int append);
 t_redir				*ms_create_redir(t_redir_type type, char *file);
 int					ms_is_redir(t_token_type type);
 int					ms_count_args(t_list *tokens);
@@ -141,6 +155,12 @@ t_command			*ms_build_single_command(t_list **tokens);
 
 void				ms_expand_vars(t_data *data, t_command *cmd);
 void				ms_remove_quotes(t_command *cmd);
+char				*ms_replace_var(t_data *data, const char *key, int var_len);
+int					ms_get_var_len(const char *s);
+char				*ms_process_variable(t_data *data, char *str, int *i,
+						char *new_str);
+int					ms_should_expand(char *str, int i, char quote_state);
+void				ms_update_quote_state(char c, char *quote_state);
 
 /*  Builtins */
 
@@ -152,6 +172,9 @@ int					ms_builtin_cd(t_data *data, char **args);
 int					ms_builtin_unset(t_data *data, char **args);
 int					ms_builtin_export(t_data *data, char **args);
 int					ms_builtin_exit(t_data *data, char **args);
+void				ms_update_env_node(t_list **env_list, char *key,
+						char *value);
+void				ms_remove_env_var(t_data *data, char *key);
 
 /*  Execution */
 

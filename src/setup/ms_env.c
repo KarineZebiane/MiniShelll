@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ms_env.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abkhoder <abkhoder@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:40:57 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/16 14:56:53 by abkhoder         ###   ########.fr       */
+/*   Updated: 2026/01/21 21:37:01 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,15 +24,11 @@ void	ms_free_env_node(void *content)
 	free(env);
 }
 
-static t_env	*ms_create_env_node_content(char *env_line)
+static int	ms_parse_env_line(t_env *new_env, char *env_line)
 {
-	t_env	*new_env;
 	char	*equal_sign;
 	size_t	key_len;
 
-	new_env = (t_env *)malloc(sizeof(t_env));
-	if (!new_env)
-		return (NULL);
 	equal_sign = strchr(env_line, '=');
 	if (equal_sign)
 	{
@@ -46,6 +42,18 @@ static t_env	*ms_create_env_node_content(char *env_line)
 		new_env->value = ft_strdup("");
 	}
 	if (!new_env->key || !new_env->value)
+		return (0);
+	return (1);
+}
+
+static t_env	*ms_create_env_node_content(char *env_line)
+{
+	t_env	*new_env;
+
+	new_env = (t_env *)malloc(sizeof(t_env));
+	if (!new_env)
+		return (NULL);
+	if (!ms_parse_env_line(new_env, env_line))
 	{
 		ms_free_env_node(new_env);
 		return (NULL);
@@ -54,11 +62,31 @@ static t_env	*ms_create_env_node_content(char *env_line)
 	return (new_env);
 }
 
+static int	ms_add_env_node(t_list **env_list, char *env_str)
+{
+	t_list	*new_node;
+	t_env	*env_content;
+
+	env_content = ms_create_env_node_content(env_str);
+	if (!env_content)
+	{
+		ft_lstclear(env_list, ms_free_env_node);
+		return (0);
+	}
+	new_node = ft_lstnew(env_content);
+	if (!new_node)
+	{
+		ms_free_env_node(env_content);
+		ft_lstclear(env_list, ms_free_env_node);
+		return (0);
+	}
+	ft_lstadd_back(env_list, new_node);
+	return (1);
+}
+
 t_list	*ms_create_env_list(char **envp)
 {
 	t_list	*env_list;
-	t_list	*new_node;
-	t_env	*env_content;
 	int		i;
 
 	if (!envp)
@@ -67,35 +95,9 @@ t_list	*ms_create_env_list(char **envp)
 	env_list = NULL;
 	while (envp[i])
 	{
-		env_content = ms_create_env_node_content(envp[i]);
-		if (!env_content)
-		{
-			ft_lstclear(&env_list, ms_free_env_node);
+		if (!ms_add_env_node(&env_list, envp[i]))
 			return (NULL);
-		}
-		new_node = ft_lstnew(env_content);
-		if (!new_node)
-		{
-			ms_free_env_node(env_content);
-			ft_lstclear(&env_list, ms_free_env_node);
-			return (NULL);
-		}
-		ft_lstadd_back(&env_list, new_node);
 		i++;
 	}
 	return (env_list);
-}
-
-char	*ms_get_env_value(t_list *env_list, const char *key)
-{
-	t_env	*env;
-
-	while (env_list)
-	{
-		env = (t_env *)env_list->content;
-		if (ft_strcmp(env->key, key) == 0)
-			return (env->value);
-		env_list = env_list->next;
-	}
-	return (NULL);
 }

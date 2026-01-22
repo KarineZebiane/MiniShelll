@@ -3,42 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   ms_builtin_complex.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abkhoder <abkhoder@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:36:17 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/16 10:29:26 by abkhoder         ###   ########.fr       */
+/*   Updated: 2026/01/22 19:30:12 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
-
-/* Updates or adds an environment variable in the list
-env_list The pointer to the environment list
-key The variable name , value The variable value */
-static void	ms_update_env_node(t_list **env_list, char *key, char *value)
-{
-	t_list	*tmp;
-	t_env	*env;
-
-	tmp = *env_list;
-	while (tmp)
-	{
-		env = (t_env *)tmp->content;
-		if (ft_strcmp(env->key, key) == 0)
-		{
-			free(env->value);
-			env->value = ft_strdup(value);
-			return ;
-		}
-		tmp = tmp->next;
-	}
-	env = malloc(sizeof(t_env));
-	if (!env)
-		return ;
-	env->key = ft_strdup(key);
-	env->value = ft_strdup(value);
-	ft_lstadd_back(env_list, ft_lstnew(env));
-}
 
 /* Implementation of the 'cd' builtin
 Changes directory and updates PWD/OLDPWD in environment.

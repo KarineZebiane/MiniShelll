@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   build_command.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abkhoder <abkhoder@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/26 16:13:43 by kzebian           #+#    #+#             */
-/*   Updated: 2026/01/09 18:09:52 by abkhoder         ###   ########.fr       */
+/*   Updated: 2026/01/21 21:48:31 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,15 +83,30 @@ static void	fill_args(t_command *cmd, t_list *tokens, int arg_count)
 	cmd->args[i] = NULL;
 }
 
-/*
-** Build a single command from tokens until pipe or end
-*/
+static int	ms_process_token(t_command *cmd, t_list **tokens)
+{
+	t_token	*token;
+
+	token = (t_token *)(*tokens)->content;
+	if (token->type == TOKEN_PIPE)
+	{
+		*tokens = (*tokens)->next;
+		return (1);
+	}
+	if (ms_is_redir(token->type))
+	{
+		if (!add_redir_to_cmd(cmd, tokens))
+			return (-1);
+	}
+	return (0);
+}
+
 t_command	*ms_build_single_command(t_list **tokens)
 {
 	t_command	*cmd;
-	t_token		*token;
 	int			arg_count;
 	t_list		*start;
+	int			result;
 
 	cmd = ms_create_command();
 	if (!cmd)
@@ -101,17 +116,11 @@ t_command	*ms_build_single_command(t_list **tokens)
 	fill_args(cmd, start, arg_count);
 	while (*tokens)
 	{
-		token = (t_token *)(*tokens)->content;
-		if (token->type == TOKEN_PIPE)
-		{
-			*tokens = (*tokens)->next;
+		result = ms_process_token(cmd, tokens);
+		if (result == 1)
 			break ;
-		}
-		if (ms_is_redir(token->type))
-		{
-			if (!add_redir_to_cmd(cmd, tokens))
-				return (NULL);
-		}
+		if (result == -1)
+			return (NULL);
 		*tokens = (*tokens)->next;
 	}
 	return (cmd);

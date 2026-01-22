@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ms_execute_cmd.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abkhoder <abkhoder@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:55:45 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/16 15:01:15 by abkhoder         ###   ########.fr       */
+/*   Updated: 2026/01/21 22:15:16 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,9 +43,18 @@ static char	**ms_get_env_array(t_list *env_list)
 	return (env_array);
 }
 
-/* Handles the actual execution of an external command
-This function is called inside a child process
-data Main shell data , cmd Current command structure */
+static void	ms_exec_error_exit(t_data *data, char *cmd_name, int exit_code)
+{
+	ft_putstr_fd("minishell: ", 2);
+	ft_putstr_fd(cmd_name, 2);
+	if (exit_code == 127)
+		ft_putendl_fd(": command not found", 2);
+	else
+		perror("");
+	ms_cleanup(data);
+	exit(exit_code);
+}
+
 void	ms_execute_external(t_data *data, t_command *cmd)
 {
 	char	*path;
@@ -54,13 +63,7 @@ void	ms_execute_external(t_data *data, t_command *cmd)
 	ms_signals_child();
 	path = ms_resolve_path(data, cmd->args[0]);
 	if (!path)
-	{
-		ft_putstr_fd("minishell: ", 2);
-		ft_putstr_fd(cmd->args[0], 2);
-		ft_putendl_fd(": command not found", 2);
-		ms_cleanup(data);
-		exit(127);
-	}
+		ms_exec_error_exit(data, cmd->args[0], 127);
 	env_tab = ms_get_env_array(data->env_list);
 	if (!env_tab)
 	{
@@ -69,16 +72,11 @@ void	ms_execute_external(t_data *data, t_command *cmd)
 		exit(EXIT_FAILURE);
 	}
 	execve(path, cmd->args, env_tab);
-	perror("minishell: execve");
 	free(path);
 	ft_free_array(env_tab);
-	ms_cleanup(data);
-	exit(126);
+	ms_exec_error_exit(data, cmd->args[0], 126);
 }
 
-/* Forking logic for a single (non-piped) external command
-data Main shell data 
-cmd Current command structure  */
 void	ms_execute_fork(t_data *data, t_command *cmd)
 {
 	cmd->pid = fork();

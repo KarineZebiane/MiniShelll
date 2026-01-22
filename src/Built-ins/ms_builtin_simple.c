@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ms_builtin_simple.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abkhoder <abkhoder@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:55:38 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/18 19:28:17 by kzebian          ###   ########.fr       */
+/*   Updated: 2026/01/19 15:32:30 by abkhoder         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,8 +68,7 @@ int	ms_builtin_echo(char **args)
 		i++;
 	}
 	while (args[i])
-	{
-		
+	{	
 		ft_putstr_fd(args[i], STDOUT_FILENO);
 		if (args[i + 1])
 			ft_putchar_fd(' ', STDOUT_FILENO);

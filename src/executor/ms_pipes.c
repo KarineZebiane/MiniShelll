@@ -3,21 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   ms_pipes.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abkhoder <abkhoder@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:56:07 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/16 14:26:56 by abkhoder         ###   ########.fr       */
+/*   Updated: 2026/01/21 22:17:13 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-/*Handles the redirection of FDs 
-inside the child process
-If there's a previous pipe, it connects STDIN to it
-If there's a next pipe, it connects STDOUT to it , prev_fd The read end of the previous pipe
-pipe_fds The current pipe [read, write]
-is_last Boolean flag for the last command in the pipeline */
 static void	ms_pipe_redirect(int prev_fd, int *pipe_fds, int is_last)
 {
 	if (prev_fd != -1)
@@ -33,12 +27,8 @@ static void	ms_pipe_redirect(int prev_fd, int *pipe_fds, int is_last)
 	}
 }
 
-/* Logic for a single child process within a pipeline
-Sets up signals, redirections, and executes the command
-data Main data structure,  cmd Current command struct
-p_fds Array containing [prev_pipe_read_fd
-current_pipe_read, write], is_last Boolean flag */
-static void	ms_child_pipeline(t_data *data, t_command *cmd, int *p_fds, int is_last)
+static void	ms_child_pipeline(t_data *data, t_command *cmd, int *p_fds,
+		int is_last)
 {
 	ms_pipe_redirect(p_fds[0], &p_fds[1], is_last);
 	if (ms_setup_redirections(cmd) != 0)
@@ -48,10 +38,19 @@ static void	ms_child_pipeline(t_data *data, t_command *cmd, int *p_fds, int is_l
 	ms_execute_external(data, cmd);
 }
 
-/* Iterates through the command list and
-forks processes for each pipe,data Main shell structure
-prev_fd The read end of the previous pipe (starts at -1)
-current Pointer to the current command in the list */
+static void	ms_handle_parent_pipe(int *prev_fd, int *pipe_fds, int has_next)
+{
+	if (*prev_fd != -1)
+		close(*prev_fd);
+	if (has_next)
+	{
+		close(pipe_fds[1]);
+		*prev_fd = pipe_fds[0];
+	}
+	else
+		*prev_fd = -1;
+}
+
 static void	ms_fork_pipeline(t_data *data, int prev_fd, t_list *current)
 {
 	int			pipe_fds[2];
@@ -71,22 +70,11 @@ static void	ms_fork_pipeline(t_data *data, int prev_fd, t_list *current)
 			p_params[2] = pipe_fds[1];
 			ms_child_pipeline(data, cmd, p_params, current->next == NULL);
 		}
-		if (prev_fd != -1)
-			close(prev_fd);
-		if (current->next)
-		{
-			close(pipe_fds[1]);
-			prev_fd = pipe_fds[0];
-		}
-		else
-			prev_fd = -1;
+		ms_handle_parent_pipe(&prev_fd, pipe_fds, current->next != NULL);
 		current = current->next;
 	}
 }
 
-/* Entry point for pipeline execution
-Creates the chain of processes and waits for them to finish
-data The main shell structure */
 void	ms_execute_pipeline(t_data *data)
 {
 	if (!data->command_list)

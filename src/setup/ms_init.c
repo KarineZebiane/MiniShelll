@@ -6,7 +6,7 @@
 /*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:56:45 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/18 21:23:23 by kzebian          ###   ########.fr       */
+/*   Updated: 2026/01/21 23:28:21 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,6 @@ void	ms_cleanup(t_data *data)
 	if (data->stdin_backup != -1)
 		close(data->stdin_backup);
 	data->stdin_backup = -1;
-
 	if (data->stdout_backup != -1)
 		close(data->stdout_backup);
 	data->stdout_backup = -1;

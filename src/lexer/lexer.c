@@ -3,22 +3,55 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abkhoder <abkhoder@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 00:01:37 by kzebian           #+#    #+#             */
-/*   Updated: 2026/01/16 16:26:58 by abkhoder         ###   ########.fr       */
+/*   Updated: 2026/01/21 21:48:19 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
+static t_token	*ms_get_next_token(const char *input, int *i)
+{
+	t_token	*token_content;
+	char	*word;
+
+	if (ms_is_special_char(input[*i]))
+		token_content = ms_tokenize_operator(input, i);
+	else
+	{
+		word = ms_extract_word(input, i);
+		token_content = ms_create_token(TOKEN_WORD, word);
+	}
+	return (token_content);
+}
+
+static int	ms_add_token_to_list(t_list **token_list, t_token *token_content)
+{
+	t_list	*new_node;
+
+	if (!token_content)
+	{
+		ft_lstclear(token_list, ms_free_token);
+		return (0);
+	}
+	new_node = ft_lstnew(token_content);
+	if (!new_node)
+	{
+		ms_free_token(token_content);
+		ft_lstclear(token_list, ms_free_token);
+		return (0);
+	}
+	ft_lstadd_back(token_list, new_node);
+	return (1);
+}
+
 t_list	*ms_lexer(const char *input)
 {
-	t_list		*token_list;
-	t_token		*token_content;
-	t_list		*new_node;
-	int			i;
-	char		*word;
+	t_list	*token_list;
+	t_token	*token_content;
+	int		i;
 
 	if (ms_has_unclosed_quotes(input))
 	{
@@ -33,26 +66,9 @@ t_list	*ms_lexer(const char *input)
 			i++;
 		if (!input[i])
 			break ;
-		if (ms_is_special_char(input[i]))
-			token_content = ms_tokenize_operator(input, &i);
-		else
-		{
-			word = ms_extract_word(input, &i);
-			token_content = ms_create_token(TOKEN_WORD, word);
-		}
-		if (!token_content)
-		{
-			ft_lstclear(&token_list, ms_free_token);
+		token_content = ms_get_next_token(input, &i);
+		if (!ms_add_token_to_list(&token_list, token_content))
 			return (NULL);
-		}
-		new_node = ft_lstnew(token_content);
-		if (!new_node)
-		{
-			ms_free_token(token_content);
-			ft_lstclear(&token_list, ms_free_token);
-			return (NULL);
-		}
-		ft_lstadd_back(&token_list, new_node);
 	}
 	return (token_list);
 }

@@ -6,13 +6,13 @@
 /*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/04 23:14:38 by kzebian           #+#    #+#             */
-/*   Updated: 2026/01/04 23:22:04 by kzebian          ###   ########.fr       */
+/*   Updated: 2026/01/21 21:59:59 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-static int	ms_open_redir_in(char *file)
+int	ms_open_redir_in(char *file)
 {
 	int	fd;
 
@@ -28,7 +28,7 @@ static int	ms_open_redir_in(char *file)
 	return (fd);
 }
 
-static int	ms_open_redir_out(char *file, int append)
+int	ms_open_redir_out(char *file, int append)
 {
 	int	fd;
 	int	flags;
@@ -50,11 +50,23 @@ static int	ms_open_redir_out(char *file, int append)
 	return (fd);
 }
 
+static int	ms_process_redir(t_redir *redir)
+{
+	if (redir->type == REDIR_IN)
+		return (ms_handle_redir_in(redir));
+	else if (redir->type == REDIR_OUT)
+		return (ms_handle_redir_out(redir, 0));
+	else if (redir->type == REDIR_APPEND)
+		return (ms_handle_redir_out(redir, 1));
+	else if (redir->type == REDIR_HEREDOC)
+		return (ms_handle_heredoc(redir));
+	return (0);
+}
+
 int	ms_setup_redirections(t_command *cmd)
 {
 	t_list	*redir_list;
 	t_redir	*redir;
-	int		fd;
 
 	if (!cmd || !cmd->redirections)
 		return (0);
@@ -62,38 +74,8 @@ int	ms_setup_redirections(t_command *cmd)
 	while (redir_list)
 	{
 		redir = (t_redir *)redir_list->content;
-		if (redir->type == REDIR_IN)
-		{
-			fd = ms_open_redir_in(redir->file);
-			if (fd < 0)
-				return (-1);
-			dup2(fd, STDIN_FILENO);
-			close(fd);
-		}
-		else if (redir->type == REDIR_OUT)
-		{
-			fd = ms_open_redir_out(redir->file, 0);
-			if (fd < 0)
-				return (-1);
-			dup2(fd, STDOUT_FILENO);
-			close(fd);
-		}
-		else if (redir->type == REDIR_APPEND)
-		{
-			fd = ms_open_redir_out(redir->file, 1);
-			if (fd < 0)
-				return (-1);
-			dup2(fd, STDOUT_FILENO);
-			close(fd);
-		}
-		else if (redir->type == REDIR_HEREDOC)
-		{
-			fd = ms_do_heredoc(redir);
-			if (fd < 0)
-				return (-1);
-			dup2(fd, STDIN_FILENO);
-			close(fd);
-		}
+		if (ms_process_redir(redir) < 0)
+			return (-1);
 		redir_list = redir_list->next;
 	}
 	return (0);
