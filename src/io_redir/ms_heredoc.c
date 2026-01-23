@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ms_heredoc.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abkhoder <abkhoder@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/04 23:15:04 by kzebian           #+#    #+#             */
-/*   Updated: 2026/01/21 21:56:40 by kzebian          ###   ########.fr       */
+/*   Updated: 2026/01/23 16:50:43 by abkhoder         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ int	ms_do_heredoc(t_redir *redir)
 		perror("minishell: pipe");
 		return (-1);
 	}
+	ms_signals_heredoc();
 	while (1)
 	{
 		if (ms_heredoc_read_line(delimiter, pipe_fds[1]))

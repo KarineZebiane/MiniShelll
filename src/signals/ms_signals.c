@@ -6,7 +6,7 @@
 /*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/26 16:05:29 by kzebian           #+#    #+#             */
-/*   Updated: 2026/01/09 17:15:03 by kzebian          ###   ########.fr       */
+/*   Updated: 2026/01/23 21:37:50 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,27 +15,35 @@
 void	ms_handle_sigint(int sig)
 {
 	(void)sig;
-	g_signal_status = sig;
+	g_signal_status = 130;
 	write(STDOUT_FILENO, "\n", 1);
 	rl_on_new_line();
 	rl_replace_line("", 0);
 	rl_redisplay();
 }
 
-void	ms_setup_signals(void)
+void	ms_handle_heredoc_sig(int sig)
 {
-	struct sigaction	sa_int;
-	struct sigaction	sa_quit;
-
-	sa_int.sa_handler = ms_handle_sigint;
-	sigemptyset(&sa_int.sa_mask);
-	sa_int.sa_flags = SA_RESTART;
-	sigaction(SIGINT, &sa_int, NULL);
-	sa_quit.sa_handler = SIG_IGN;
-	sigemptyset(&sa_quit.sa_mask);
-	sa_quit.sa_flags = 0;
-	sigaction(SIGQUIT, &sa_quit, NULL);
+	(void)sig;
+	g_signal_status = 130;
+	write(STDOUT_FILENO, "\n", 1);
+	exit(130);
 }
+
+// void	ms_setup_signals(void)
+// {
+// 	struct sigaction	sa_int;
+// 	struct sigaction	sa_quit;
+
+// 	sa_int.sa_handler = ms_handle_sigint;
+// 	sigemptyset(&sa_int.sa_mask);
+// 	sa_int.sa_flags = SA_RESTART;
+// 	sigaction(SIGINT, &sa_int, NULL);
+// 	sa_quit.sa_handler = SIG_IGN;
+// 	sigemptyset(&sa_quit.sa_mask);
+// 	sa_quit.sa_flags = 0;
+// 	sigaction(SIGQUIT, &sa_quit, NULL);
+// }
 
 void	ms_signals_child(void)
 {
@@ -45,6 +53,7 @@ void	ms_signals_child(void)
 
 void	ms_signals_heredoc(void)
 {
-	signal(SIGINT, SIG_DFL);
+	signal(SIGINT, ms_handle_heredoc_sig);
 	signal(SIGQUIT, SIG_IGN);
 }
+

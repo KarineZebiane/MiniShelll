@@ -6,7 +6,7 @@
 /*   By: abkhoder <abkhoder@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:55:51 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/16 15:00:05 by abkhoder         ###   ########.fr       */
+/*   Updated: 2026/01/23 16:42:26 by abkhoder         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,16 @@
 /* Handles the execution of a single command.
 If it's a built-in, it runs in the parent process (for things like cd/exit)
 If it's external, it forks a child process, data The main shell structure
-cmd The command to execute */
+cmd The command to execute*/
 static void	ms_execute_single(t_data *data, t_command *cmd)
 {
 	if (!cmd->args || !cmd->args[0])
+	{
+		ms_save_io(data);
+		ms_setup_redirections(cmd);
+		ms_restore_io(data);
 		return ;
+	}
 	if (ms_is_builtin(cmd->args[0]))
 	{
 		ms_save_io(data);
@@ -28,24 +33,13 @@ static void	ms_execute_single(t_data *data, t_command *cmd)
 		ms_restore_io(data);
 	}
 	else
-	{
-		cmd->pid = fork();
-		if (cmd->pid == 0)
-		{
-			if (ms_setup_redirections(cmd) != 0)
-				exit(EXIT_FAILURE);
-			ms_execute_external(data, cmd);
-		}
-		else
-		{
-			waitpid(cmd->pid, &data->last_exit_code, 0);
-		}
-	}
+		ms_execute_fork(data, cmd);
 }
 
-/* The central manager for execution flow (P2.4)
+/* The central manager for execution flow 
 Determines if we are running a single command or a pipeline
-data The main shell structure containing the command list  */
+data The main shell structure containing the command list
+*/
 void	ms_execute_manager(t_data *data)
 {
 	int	cmd_count;
@@ -64,8 +58,9 @@ void	ms_execute_manager(t_data *data)
 }
 
 /* Helper to wait for all child processes in a pipeline
-Updates the last_exit_code based on the last command's status
-data The main shell structure  */
+** Updates the last_exit_code based on the last command's status
+** data The main shell structure
+*/
 void	ms_wait_all(t_data *data)
 {
 	t_list		*current;

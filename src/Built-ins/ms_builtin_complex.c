@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ms_builtin_complex.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abkhoder <abkhoder@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:36:17 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/22 19:30:12 by kzebian          ###   ########.fr       */
+/*   Updated: 2026/01/23 15:11:16 by abkhoder         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,31 +49,37 @@ int	ms_builtin_cd(t_data *data, char **args)
 Removes a variable from the environment list.
 param data Main shell data , param args Argument vector
 return int Always 0 */
+static void	ms_unset_var(t_data *data, char *key)
+{
+	t_list	*curr;
+	t_list	*prev;
+
+	curr = data->env_list;
+	prev = NULL;
+	while (curr)
+	{
+		if (ft_strcmp(((t_env *)curr->content)->key, key) == 0)
+		{
+			if (prev)
+				prev->next = curr->next;
+			else
+				data->env_list = curr->next;
+			ft_lstdelone(curr, ms_free_env_node);
+			return ;
+		}
+		prev = curr;
+		curr = curr->next;
+	}
+}
+
 int	ms_builtin_unset(t_data *data, char **args)
 {
 	int		i;
-	t_list	*curr;
-	t_list	*prev;
 
 	i = 1;
 	while (args[i])
 	{
-		curr = data->env_list;
-		prev = NULL;
-		while (curr)
-		{
-			if (ft_strcmp(((t_env *)curr->content)->key, args[i]) == 0)
-			{
-				if (prev)
-					prev->next = curr->next;
-				else
-					data->env_list = curr->next;
-				ft_lstdelone(curr, ms_free_env_node);
-				break ;
-			}
-			prev = curr;
-			curr = curr->next;
-		}
+		ms_unset_var(data, args[i]);
 		i++;
 	}
 	return (0);

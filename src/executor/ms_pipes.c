@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ms_pipes.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
+/*   By: abkhoder <abkhoder@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:56:07 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/21 22:17:13 by kzebian          ###   ########.fr       */
+/*   Updated: 2026/01/23 13:51:59 by abkhoder         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,11 +30,20 @@ static void	ms_pipe_redirect(int prev_fd, int *pipe_fds, int is_last)
 static void	ms_child_pipeline(t_data *data, t_command *cmd, int *p_fds,
 		int is_last)
 {
+	int	exit_code;
+
 	ms_pipe_redirect(p_fds[0], &p_fds[1], is_last);
 	if (ms_setup_redirections(cmd) != 0)
+	{
+		ms_cleanup(data);
 		exit(EXIT_FAILURE);
+	}
 	if (ms_is_builtin(cmd->args[0]))
-		exit(ms_run_builtin(data, cmd));
+	{
+		exit_code = ms_run_builtin(data, cmd);
+		ms_cleanup(data);
+		exit(exit_code);
+	}
 	ms_execute_external(data, cmd);
 }
 
