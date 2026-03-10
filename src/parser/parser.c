@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abkhoder <abkhoder@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/26 16:14:27 by kzebian           #+#    #+#             */
-/*   Updated: 2026/01/09 18:10:00 by abkhoder         ###   ########.fr       */
+/*   Updated: 2026/03/10 01:10:37 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@ void	ms_free_redir(void *content)
 	redir = (t_redir *)content;
 	if (!redir)
 		return ;
+	if (redir->fd != -1)
+		close(redir->fd);
 	free(redir->file);
 	free(redir);
 }

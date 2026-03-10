@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ms_redir_setup.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/04 23:14:38 by kzebian           #+#    #+#             */
-/*   Updated: 2026/01/21 21:59:59 by kzebian          ###   ########.fr       */
+/*   Updated: 2026/03/10 00:03:25 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,7 @@ int	ms_open_redir_out(char *file, int append)
 	}
 	return (fd);
 }
-
-static int	ms_process_redir(t_redir *redir)
+static int	ms_process_redir(t_redir *redir, int orig_stdin)
 {
 	if (redir->type == REDIR_IN)
 		return (ms_handle_redir_in(redir));
@@ -59,7 +58,7 @@ static int	ms_process_redir(t_redir *redir)
 	else if (redir->type == REDIR_APPEND)
 		return (ms_handle_redir_out(redir, 1));
 	else if (redir->type == REDIR_HEREDOC)
-		return (ms_handle_heredoc(redir));
+		return (ms_handle_heredoc(redir, orig_stdin));
 	return (0);
 }
 
@@ -67,16 +66,24 @@ int	ms_setup_redirections(t_command *cmd)
 {
 	t_list	*redir_list;
 	t_redir	*redir;
+	int		orig_stdin;   
 
 	if (!cmd || !cmd->redirections)
 		return (0);
+	orig_stdin = dup(STDIN_FILENO);
+	if (orig_stdin < 0)
+		return (-1);
 	redir_list = cmd->redirections;
 	while (redir_list)
 	{
 		redir = (t_redir *)redir_list->content;
-		if (ms_process_redir(redir) < 0)
+		if (ms_process_redir(redir, orig_stdin) < 0)
+		{
+			close(orig_stdin);
 			return (-1);
+		}
 		redir_list = redir_list->next;
 	}
+	close(orig_stdin);
 	return (0);
 }

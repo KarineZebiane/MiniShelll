@@ -6,7 +6,7 @@
 /*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/26 16:14:41 by kzebian           #+#    #+#             */
-/*   Updated: 2026/01/21 21:42:24 by kzebian          ###   ########.fr       */
+/*   Updated: 2026/02/27 14:12:31 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,8 @@
 
 static int	check_redir_file(t_list *current)
 {
-	t_token	*token;
 	t_token	*next_token;
 
-	token = (t_token *)current->content;
 	if (!current->next)
 	{
 		ft_putendl_fd("minishell: syntax error near redirection", 2);

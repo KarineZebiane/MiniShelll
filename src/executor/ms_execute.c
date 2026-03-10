@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ms_execute.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abkhoder <abkhoder@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:55:51 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/23 16:42:26 by abkhoder         ###   ########.fr       */
+/*   Updated: 2026/03/10 01:09:35 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,21 +40,19 @@ static void	ms_execute_single(t_data *data, t_command *cmd)
 Determines if we are running a single command or a pipeline
 data The main shell structure containing the command list
 */
-void	ms_execute_manager(t_data *data)
+void    ms_execute_manager(t_data *data)
 {
-	int	cmd_count;
+    int    cmd_count;
 
-	if (!data->command_list)
-		return ;
-	cmd_count = ft_lstsize(data->command_list);
-	if (cmd_count == 1)
-	{
-		ms_execute_single(data, (t_command *)data->command_list->content);
-	}
-	else if (cmd_count > 1)
-	{
-		ms_execute_pipeline(data);
-	}
+    if (!data->command_list)
+        return ;
+    if (ms_preprocess_heredocs(data) < 0)
+        return ;
+    cmd_count = ft_lstsize(data->command_list);
+    if (cmd_count == 1)
+        ms_execute_single(data, (t_command *)data->command_list->content);
+    else if (cmd_count > 1)
+        ms_execute_pipeline(data);
 }
 
 /* Helper to wait for all child processes in a pipeline

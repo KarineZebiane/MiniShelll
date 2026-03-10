@@ -6,7 +6,7 @@
 /*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:37:11 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/21 22:29:53 by kzebian          ###   ########.fr       */
+/*   Updated: 2026/02/27 14:12:24 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ static void	ms_shell_loop(t_data *data)
 
 	while (1)
 	{
-		ms_setup_signals();
+		ms_signals_default();
 		line = readline(PROMPT);
 		if (!line)
 		{

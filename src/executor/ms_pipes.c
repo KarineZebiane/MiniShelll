@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ms_pipes.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abkhoder <abkhoder@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:56:07 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/23 13:51:59 by abkhoder         ###   ########.fr       */
+/*   Updated: 2026/02/27 14:12:28 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ static void	ms_child_pipeline(t_data *data, t_command *cmd, int *p_fds,
 
 static void	ms_handle_parent_pipe(int *prev_fd, int *pipe_fds, int has_next)
 {
+	ms_signals_ignore();
 	if (*prev_fd != -1)
 		close(*prev_fd);
 	if (has_next)
@@ -90,4 +91,5 @@ void	ms_execute_pipeline(t_data *data)
 		return ;
 	ms_fork_pipeline(data, -1, data->command_list);
 	ms_wait_all(data);
+	ms_signals_default();
 }

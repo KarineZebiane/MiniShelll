@@ -1,42 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ms_signals.c                                       :+:      :+:    :+:   */
+/*   ms_signals_helper.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/12/26 16:05:29 by kzebian           #+#    #+#             */
-/*   Updated: 2026/02/27 15:11:53 by kzebian          ###   ########.fr       */
+/*   Created: 2026/02/27 15:09:24 by kzebian           #+#    #+#             */
+/*   Updated: 2026/02/27 15:15:13 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-void	ms_handle_sigint(int sig)
+void	ms_signals_default(void)
 {
-	g_signal_status = sig;
-	write(STDOUT_FILENO, "\n", 1);
-	rl_on_new_line();
-	rl_replace_line("", 0);
-	rl_redisplay();
+	signal(SIGINT, ms_handle_sigint);
+	signal(SIGQUIT, SIG_IGN);
 }
 
-void	ms_handle_heredoc_sig(int sig)
+void	ms_signals_ignore(void)
 {
-	(void)sig;
-	g_signal_status = 130;
-	write(STDOUT_FILENO, "\n", 1);
-	exit(130);
-}
-
-void	ms_signals_child(void)
-{
-	signal(SIGINT, SIG_DFL);
-	signal(SIGQUIT, SIG_DFL);
-}
-
-void	ms_signals_heredoc(void)
-{
-	signal(SIGINT, ms_handle_heredoc_sig);
+	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_IGN);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser_utils.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abkhoder <abkhoder@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/26 16:14:07 by kzebian           #+#    #+#             */
-/*   Updated: 2026/01/09 18:09:56 by abkhoder         ###   ########.fr       */
+/*   Updated: 2026/03/10 01:02:38 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ t_redir	*ms_create_redir(t_redir_type type, char *file)
 	if (!redir)
 		return (NULL);
 	redir->type = type;
+	redir->fd = -1;
 	redir->file = ft_strdup(file);
 	if (!redir->file)
 	{

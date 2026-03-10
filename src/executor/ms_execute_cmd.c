@@ -6,7 +6,7 @@
 /*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:55:45 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/21 22:15:16 by kzebian          ###   ########.fr       */
+/*   Updated: 2026/02/27 14:12:27 by kzebian          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,7 @@ void	ms_execute_external(t_data *data, t_command *cmd)
 void	ms_execute_fork(t_data *data, t_command *cmd)
 {
 	cmd->pid = fork();
+	ms_signals_ignore();
 	if (cmd->pid == -1)
 	{
 		perror("minishell: fork");
@@ -96,4 +97,5 @@ void	ms_execute_fork(t_data *data, t_command *cmd)
 		ms_execute_external(data, cmd);
 	}
 	ms_wait_all(data);
+	ms_signals_default();
 }

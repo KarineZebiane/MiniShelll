@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ms_redir_handlers.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/21 22:00:51 by kzebian           #+#    #+#             */
-/*   Updated: 2026/01/21 22:00:54 by kzebian          ###   ########.fr       */
+/*   Updated: 2026/03/10 01:07:19 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,14 @@ int	ms_handle_redir_out(t_redir *redir, int append)
 	return (0);
 }
 
-int	ms_handle_heredoc(t_redir *redir)
+int	ms_handle_heredoc(t_redir *redir, int orig_stdin)
 {
 	int	fd;
-
-	fd = ms_do_heredoc(redir);
+	
+	if (redir->fd != -1)
+		fd = redir->fd;
+	else
+		fd = ms_do_heredoc(redir, orig_stdin);
 	if (fd < 0)
 		return (-1);
 	dup2(fd, STDIN_FILENO);

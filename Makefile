@@ -18,6 +18,7 @@ SRCS        = $(SRC_DIR)/main.c \
               $(SRC_DIR)/setup/ms_env_utils.c \
               $(SRC_DIR)/setup/utils.c \
               $(SRC_DIR)/signals/ms_signals.c \
+              $(SRC_DIR)/signals/ms_signals_helper.c \
               $(SRC_DIR)/lexer/lexer.c \
               $(SRC_DIR)/lexer/token_utils.c \
               $(SRC_DIR)/lexer/char_utils.c \

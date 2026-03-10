@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kzebian <kzebian@student.42.fr>            +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/09 14:29:12 by abkhoder          #+#    #+#             */
-/*   Updated: 2026/01/21 22:33:28 by kzebian          ###   ########.fr       */
+/*   Updated: 2026/03/10 01:00:40 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,7 @@ typedef struct s_redir
 {
 	t_redir_type	type;
 	char			*file;
+	int				fd;
 }					t_redir;
 
 typedef struct s_command
@@ -109,9 +110,7 @@ void				ms_restore_io(t_data *data);
 t_list				*ms_create_env_list(char **envp);
 char				*ms_get_env_value(t_list *env_list, const char *key);
 void				ms_free_env_node(void *content);
-void				ms_setup_signals(void);
 void				ms_handle_sigint(int sig);
-void				ms_signals_child(void);
 void				ms_signals_heredoc(void);
 void				ms_free_command_node(void *content);
 void				ms_free_redir(void *content);
@@ -142,10 +141,11 @@ t_command			*ms_create_command(void);
 void				ms_add_argument(t_command *cmd, char *arg);
 int					ms_add_redirection(t_command *cmd, t_list **current_token);
 int					ms_setup_redirections(t_command *cmd);
-int					ms_do_heredoc(t_redir *redir);
+int					ms_do_heredoc(t_redir *redir, int orig_stdin);
+int					ms_handle_heredoc(t_redir *redir, int orig_stdin);
 int					ms_handle_redir_in(t_redir *redir);
+int					ms_preprocess_heredocs(t_data *data);
 int					ms_handle_redir_out(t_redir *redir, int append);
-int					ms_handle_heredoc(t_redir *redir);
 int					ms_open_redir_in(char *file);
 int					ms_open_redir_out(char *file, int append);
 t_redir				*ms_create_redir(t_redir_type type, char *file);
@@ -185,5 +185,11 @@ void				ms_execute_external(t_data *data, t_command *cmd);
 void				ms_execute_fork(t_data *data, t_command *cmd);
 void				ms_wait_all(t_data *data);
 void				ms_execute_pipeline(t_data *data);
+
+// signal
+
+void				ms_signals_default(void);
+void				ms_signals_child(void);
+void				ms_signals_ignore(void);
 
 #endif

@@ -3,24 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   ms_heredoc.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abkhoder <abkhoder@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/04 23:15:04 by kzebian           #+#    #+#             */
-/*   Updated: 2026/01/23 16:50:43 by abkhoder         ###   ########.fr       */
+/*   Updated: 2026/03/10 01:16:34 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
 
-static void	ms_heredoc_warning(void)
+static void ms_heredoc_warning(void)
 {
 	ft_putendl_fd("minishell: warning: here-document delimited by EOF",
-		STDERR_FILENO);
+				  STDERR_FILENO);
 }
 
-static int	ms_heredoc_read_line(char *delimiter, int write_fd)
+static int ms_heredoc_read_line(char *delimiter, int write_fd)
 {
-	char	*line;
+	char *line;
 
 	line = readline("> ");
 	if (!line)
@@ -39,10 +39,10 @@ static int	ms_heredoc_read_line(char *delimiter, int write_fd)
 	return (0);
 }
 
-int	ms_do_heredoc(t_redir *redir)
+int ms_do_heredoc(t_redir *redir, int orig_stdin)
 {
-	int		pipe_fds[2];
-	char	*delimiter;
+	int pipe_fds[2];
+	char *delimiter;
 
 	delimiter = redir->file;
 	if (pipe(pipe_fds) == -1)
@@ -50,54 +50,43 @@ int	ms_do_heredoc(t_redir *redir)
 		perror("minishell: pipe");
 		return (-1);
 	}
+	dup2(orig_stdin, STDIN_FILENO);
 	ms_signals_heredoc();
 	while (1)
 	{
 		if (ms_heredoc_read_line(delimiter, pipe_fds[1]))
-			break ;
+			break;
 	}
 	close(pipe_fds[1]);
 	return (pipe_fds[0]);
 }
 
-static int	ms_heredoc_tmpfile_read(char *delimiter, int tmp_fd)
+int ms_preprocess_heredocs(t_data *data)
 {
-	char	*line;
+	t_list *cmd_node;
+	t_command *cmd;
+	t_list *redir_node;
+	t_redir *redir;   
+	int         orig_stdin;
 
-	while (1)
+    orig_stdin = dup(STDIN_FILENO);
+	cmd_node = data->command_list;
+	while (cmd_node)
 	{
-		line = readline("> ");
-		if (!line || ft_strcmp(line, delimiter) == 0)
+		cmd = (t_command *)cmd_node->content;
+		redir_node = cmd->redirections;
+		while (redir_node)
 		{
-			if (line)
-				free(line);
-			break ;
+			redir = (t_redir *)redir_node->content;
+			if (redir->type == REDIR_HEREDOC)
+			{
+				redir->fd = ms_do_heredoc(redir, orig_stdin);
+				if (redir->fd < 0)
+					return (-1);
+			}
+			redir_node = redir_node->next;
 		}
-		write(tmp_fd, line, ft_strlen(line));
-		write(tmp_fd, "\n", 1);
-		free(line);
+		cmd_node = cmd_node->next;
 	}
 	return (0);
-}
-
-int	ms_do_heredoc_tmpfile(t_redir *redir)
-{
-	int		fd;
-	char	*delimiter;
-	char	*tmpfile;
-	int		tmp_fd;
-
-	delimiter = redir->file;
-	tmpfile = "/tmp/minishell_heredoc_XXXXXX";
-	tmp_fd = mkstemp(tmpfile);
-	if (tmp_fd < 0)
-	{
-		perror("minishell: mkstemp");
-		return (-1);
-	}
-	ms_heredoc_tmpfile_read(delimiter, tmp_fd);
-	close(tmp_fd);
-	fd = open(tmpfile, O_RDONLY);
-	unlink(tmpfile);
-	return (fd);
 }
